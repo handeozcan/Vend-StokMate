@@ -1,5 +1,6 @@
 import {
   keepPreviousData,
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -69,6 +70,20 @@ function useApplyProductMutationResult() {
     });
     queryClient.invalidateQueries({ queryKey: ['product-stats'] });
   };
+}
+
+/** Infinite list for the mobile FlatList — pageParam follows API pagination. */
+export function useProductsInfinite(params: ProductQueryParams) {
+  return useInfiniteQuery({
+    queryKey: ['products', 'infinite', params],
+    queryFn: ({ pageParam }) => productApi.list({ ...params, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const totalPages = Math.max(1, Math.ceil(lastPage.total / lastPage.pageSize));
+      return lastPage.page < totalPages ? lastPage.page + 1 : undefined;
+    },
+    placeholderData: keepPreviousData,
+  });
 }
 
 export function useUpdateStock() {
