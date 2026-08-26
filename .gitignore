@@ -8,3 +8,6 @@
 *.p12
 *.key
 *.mobileprovision
+
+# Local agent/IDE settings
+.claude/
