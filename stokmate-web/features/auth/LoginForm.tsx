@@ -18,7 +18,11 @@ export function LoginForm() {
   });
   const login = useLogin();
 
-  const onSubmit = handleSubmit((values) => login.mutate(values));
+  // Guard: Enter in a text input submits even while the button is disabled —
+  // don't fire a second login (each login rotates a single-use refresh token).
+  const onSubmit = handleSubmit((values) => {
+    if (!login.isPending) login.mutate(values);
+  });
 
   return (
     <form
