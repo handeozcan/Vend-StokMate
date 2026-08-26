@@ -1,2 +1,10 @@
 # Root ignores for the whole assignment workspace
 .DS_Store
+
+# Expo
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
