@@ -28,6 +28,8 @@
 
 **Working directory:** unless a step shows an explicit `cd`, all `npx`/`npm`/`git add` commands inside tasks run from `stokmate-mobile/`.
 
+**SDK 57 layout note (discovered at implementation):** the create-expo-app SDK 57 default template places ALL app code under `src/` — routes at `src/app/`, and every shared directory (`lib/`, `api/`, `types/`, `store/`, `features/`, `components/`, `theme.ts`) lives at `src/…` too. Wherever a task below writes a path like `app/(auth)/login.tsx` or `lib/env.ts` or `features/products/…`, the ACTUAL path is `src/app/(auth)/login.tsx`, `src/lib/env.ts`, `src/features/products/…` (env.ts already lives at `src/lib/env.ts`, commit 39621cd). Only `app.json`, `eas.json`, `tsconfig.json`, `.env*` stay at the project root. `tsconfig` paths map `@/*` → `./src/*` (no baseUrl — TS 6 deprecates it).
+
 ---
 
 ## Chunk 1: Scaffold, config, data layer
