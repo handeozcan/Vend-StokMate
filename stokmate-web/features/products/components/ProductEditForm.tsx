@@ -32,6 +32,7 @@ export function ProductEditForm({ product, onSaved }: Props) {
     handleSubmit,
     control,
     setError,
+    setFocus,
     formState: { errors },
   } = useForm<ProductEditFormValues>({
     resolver: zodResolver(productEditSchema),
@@ -86,7 +87,8 @@ export function ProductEditForm({ product, onSaved }: Props) {
         onError: (error) => {
           if (error instanceof Error && (error as { status?: number }).status === 409) {
             // Focus the offending field — the SKU row can sit above the fold.
-            setError('sku', { message: error.message, shouldFocus: true });
+            setError('sku', { message: error.message });
+            setFocus('sku');
           }
           // Other errors surface via updateProduct.isError alert below.
         },
