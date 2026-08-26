@@ -105,7 +105,7 @@ export function ProductEditForm({ product, onSaved }: Props) {
       <h1 className="text-xl font-semibold">Ürünü Düzenle</h1>
 
       <p className="rounded-lg bg-sky-50 px-3 py-2 text-sm text-sky-800 ring-1 ring-sky-600/20">
-        Tedarikçi, maliyet ve açıklama alanları önceki değerlerini API'den alamıyor
+        Tedarikçi, maliyet ve açıklama alanları önceki değerlerini API&apos;den alamıyor
         (API hiçbir listeleme ucunda bu alanları döndürmüyor). Kaydetmek bu üç
         alanı girdiğiniz değerlerle üzerine yazar.
       </p>

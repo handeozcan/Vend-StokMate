@@ -32,6 +32,8 @@ export function ProductDetailView({ id }: { id: number }) {
   // A param change can remount this view for a DIFFERENT product (client-side
   // id→id navigation) — never show the previous product's toast.
   useEffect(() => {
+    // Intentional: URL/id change must clear stale toast synchronously.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setToast(null);
   }, [id]);
 
@@ -39,6 +41,8 @@ export function ProductDetailView({ id }: { id: number }) {
   // clean the URL so a refresh doesn't repeat it.
   useEffect(() => {
     if (searchParams.get('saved') === '1') {
+      // Intentional: toast is derived from the URL once, then the URL is cleaned.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setToast('Ürün güncellendi.');
       router.replace(`/products/${id}`, { scroll: false });
     }

@@ -9,7 +9,9 @@ import { useEffect, useRef } from 'react';
  */
 export function Toast({ message, onClose }: { message: string | null; onClose: () => void }) {
   const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!message) return;

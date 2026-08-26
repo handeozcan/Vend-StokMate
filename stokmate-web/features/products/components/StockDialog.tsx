@@ -47,7 +47,9 @@ export function StockDialog({ product, onClose }: Props) {
   // Escape closes — onClose lives in a ref so the listener never rebinds (and
   // never steals focus) when the parent re-renders with a new inline callback.
   const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {

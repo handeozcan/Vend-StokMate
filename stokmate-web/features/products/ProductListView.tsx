@@ -64,6 +64,8 @@ export function ProductListView() {
   // q. When the change originated from typing above, filters.q === debouncedQ
   // and this is a no-op.
   useEffect(() => {
+    // Intentional: syncs local input with browser Back/Forward URL changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if ((filters.q ?? '') !== debouncedQ) setQ(filters.q ?? '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.q]);

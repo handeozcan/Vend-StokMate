@@ -1,4 +1,4 @@
-import type { ProductQueryParams, ProductSort, ProductStatus, SortDir } from '@/types/api';
+import type { ProductQueryParams, ProductSort, ProductStatus } from '@/types/api';
 
 const SORTS: readonly ProductSort[] = ['name', 'price', 'stock', 'updatedAt'] as const;
 
