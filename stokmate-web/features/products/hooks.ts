@@ -44,6 +44,8 @@ export function useProduct(id: number) {
   return useQuery({
     queryKey: ['products', 'detail', id],
     staleTime: Infinity,
+    // Invalid route param (NaN/-1): render the invalid-id state, fetch nothing.
+    enabled: Number.isFinite(id),
     queryFn: async (): Promise<ProductDto | null> => {
       for (const [key, data] of queryClient.getQueriesData<PagedResult<ProductDto>>({
         queryKey: ['products'],

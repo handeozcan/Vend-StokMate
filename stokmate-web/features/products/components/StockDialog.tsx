@@ -44,15 +44,24 @@ export function StockDialog({ product, onClose }: Props) {
   // drop one of the two refs.
   const { ref: stockFieldRef, ...stockField } = register('stock', { valueAsNumber: true });
 
-  // Escape closes; focus lands on the input when the dialog mounts.
+  // Escape closes — onClose lives in a ref so the listener never rebinds (and
+  // never steals focus) when the parent re-renders with a new inline callback.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') onCloseRef.current();
     };
     document.addEventListener('keydown', onKey);
-    inputRef.current?.focus();
     return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, []);
+
+  // Focus lands on the input when the dialog opens. The parent conditionally
+  // mounts this component, so mount === open.
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   // Guard: Enter submits even while the button is disabled — don't double-fire.
   const onSubmit = handleSubmit((values) => {

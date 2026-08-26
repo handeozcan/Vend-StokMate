@@ -3,7 +3,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui';
 import { Toast } from '@/components/Toast';
@@ -27,6 +27,12 @@ export function ProductDetailView({ id }: { id: number }) {
   const product = useProduct(Number.isFinite(id) ? id : -1);
   const [stockDialogOpen, setStockDialogOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+
+  // A param change can remount this view for a DIFFERENT product (client-side
+  // id→id navigation) — never show the previous product's toast.
+  useEffect(() => {
+    setToast(null);
+  }, [id]);
 
   if (!Number.isFinite(id)) {
     return (
@@ -84,7 +90,7 @@ export function ProductDetailView({ id }: { id: number }) {
             <div className="mb-1 flex flex-wrap items-center gap-2">
               <h1 className="text-xl font-semibold">{data.name}</h1>
               {data.isFeatured && (
-                <span title="Öne çıkan ürün" className="text-amber-500">★</span>
+                <span title="Öne çıkan ürün" aria-label="Öne çıkan ürün" className="text-amber-500">★</span>
               )}
               <span
                 className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${STATUS_STYLES[data.status]}`}
