@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -26,11 +25,6 @@ interface Props {
 
 export function StockDialog({ product, onClose }: Props) {
   const updateStock = useUpdateStock();
-  const onCloseRef = useRef(onClose);
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-
   const {
     control,
     handleSubmit,
@@ -42,10 +36,7 @@ export function StockDialog({ product, onClose }: Props) {
 
   const onSubmit = handleSubmit((values) => {
     if (!updateStock.isPending) {
-      updateStock.mutate(
-        { id: product.id, stock: values.stock },
-        { onSuccess: () => onCloseRef.current(true) },
-      );
+      updateStock.mutate({ id: product.id, stock: values.stock }, { onSuccess: () => onClose(true) });
     }
   });
 

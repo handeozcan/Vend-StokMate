@@ -101,7 +101,7 @@ export function EditForm({ product, onSaved }: Props) {
       <Text variant="titleLarge">Ürünü Düzenle</Text>
 
       <Banner visible icon="information">
-        Tedarikçi, maliyet ve açıklama alanları önceki değerlerini API'den alamıyor (API hiçbir
+        Tedarikçi, maliyet ve açıklama alanları önceki değerlerini API&apos;den alamıyor (API hiçbir
         listeleme ucunda bu alanları döndürmüyor). Kaydetmek bu üç alanı girdiğiniz değerlerle
         üzerine yazar.
       </Banner>

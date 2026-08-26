@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { isAxiosError } from 'axios';
 
 /**
  * Normalized API failure. `status === undefined` means the request never
@@ -21,7 +21,7 @@ export function toApiError(error: unknown): ApiError {
     return error;
   }
 
-  if (axios.isAxiosError(error)) {
+  if (isAxiosError(error)) {
     const status = error.response?.status;
     const data = error.response?.data;
 

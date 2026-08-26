@@ -1,4 +1,4 @@
-import axios, { type AxiosRequestConfig } from 'axios';
+import axios, { create, type AxiosRequestConfig } from 'axios';
 import { env } from '@/lib/env';
 import { useAuthStore } from '@/store/auth';
 import { toApiError } from './errors';
@@ -14,7 +14,7 @@ declare module 'axios' {
   }
 }
 
-export const apiClient = axios.create({
+export const apiClient = create({
   baseURL: env.API_BASE_URL,
   timeout: 15_000,
 });
@@ -35,7 +35,7 @@ apiClient.interceptors.request.use((config) => {
 let refreshPromise: Promise<AuthResponse> | null = null;
 
 function refreshSession(): Promise<AuthResponse> {
-  refreshPromise ??= axios
+  refreshPromise = axios
     .post<AuthResponse>(
       `${env.API_BASE_URL}/auth/refresh`,
       { refreshToken: useAuthStore.getState().refreshToken },
