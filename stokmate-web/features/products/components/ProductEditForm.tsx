@@ -44,7 +44,10 @@ export function ProductEditForm({ product, onSaved }: Props) {
       // No GET returns these three — they start empty and MUST be (re)entered.
       supplierId: 0,
       price: product.price / 100,
-      costPrice: NaN,
+      // undefined (NOT NaN): RHF writes NaN into the uncontrolled number input
+      // as the literal string "NaN". Empty input still yields NaN at submit
+      // via valueAsNumber → Zod "Maliyet girin." message.
+      costPrice: undefined as unknown as number,
       stock: product.stock,
       minStock: product.minStock,
       unit: product.unit,
@@ -55,6 +58,10 @@ export function ProductEditForm({ product, onSaved }: Props) {
   });
 
   const onSubmit = handleSubmit((values) => {
+    // Guard: Enter submits even while the button is disabled (same pattern as
+    // login and the stock dialog) — don't double-fire the PUT.
+    if (updateProduct.isPending) return;
+
     const body: UpdateProductRequest = {
       name: values.name,
       sku: values.sku,
@@ -78,7 +85,8 @@ export function ProductEditForm({ product, onSaved }: Props) {
         onSuccess: onSaved,
         onError: (error) => {
           if (error instanceof Error && (error as { status?: number }).status === 409) {
-            setError('sku', { message: error.message });
+            // Focus the offending field — the SKU row can sit above the fold.
+            setError('sku', { message: error.message, shouldFocus: true });
           }
           // Other errors surface via updateProduct.isError alert below.
         },
