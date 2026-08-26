@@ -92,8 +92,9 @@ export default function ProductList() {
                 {category.name}
               </Chip>
             ))}
+            {categories.isError && <Chip onPress={() => categories.refetch()}>Kategoriler yüklenemedi — tekrar dene</Chip>}
           </ScrollView>
-          {products.isPending && <ActivityIndicator style={{ padding: 8 }} />}
+          {(products.isPending || products.isPlaceholderData) && <ActivityIndicator style={{ padding: 8 }} />}
           {hasFilters && <Text variant="labelSmall" style={{ opacity: 0.6 }}>{total} ürün</Text>}
         </View>
       }
