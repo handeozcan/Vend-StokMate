@@ -1,5 +1,9 @@
+import type { Metadata } from 'next';
 import { connection } from 'next/server';
 import { ProductDetailView } from '@/features/products/ProductDetailView';
+
+// The product name isn't available server-side (client-side data) — static title.
+export const metadata: Metadata = { title: 'Ürün Detayı' };
 
 export default async function ProductDetailPage({
   params,

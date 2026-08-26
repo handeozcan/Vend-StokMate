@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { authApi } from '@/api/auth';
 import { useAuthStore } from '@/store/auth';
@@ -23,6 +23,9 @@ export default function AuthedLayout({ children }: { children: ReactNode }) {
   const user = useAuthStore((s) => s.user);
   const refreshToken = useAuthStore((s) => s.refreshToken);
   const clearSession = useAuthStore((s) => s.clearSession);
+  // Explicit logout should land at a clean /login — not bounce the next login
+  // back into a deep page from the previous session.
+  const logoutIntent = useRef(false);
 
   useEffect(() => {
     void useAuthStore.persist.rehydrate();
@@ -30,6 +33,11 @@ export default function AuthedLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (hydrated && !accessToken) {
+      if (logoutIntent.current) {
+        logoutIntent.current = false;
+        router.replace('/login');
+        return;
+      }
       const search = searchParams.toString();
       const from = encodeURIComponent(`${pathname}${search ? `?${search}` : ''}`);
       router.replace(`/login?from=${from}`);
@@ -41,6 +49,7 @@ export default function AuthedLayout({ children }: { children: ReactNode }) {
   }
 
   const handleLogout = async () => {
+    logoutIntent.current = true;
     try {
       // Best-effort server-side revocation — clear locally regardless.
       if (refreshToken) await authApi.logout(refreshToken);
