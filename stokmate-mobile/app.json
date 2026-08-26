@@ -46,6 +46,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "41b21595-b18a-4a71-8610-38195b6330d8"
+      }
+    },
+    "owner": "handeozcan"
   }
 }
