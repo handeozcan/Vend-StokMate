@@ -18,7 +18,6 @@ interface AuthState {
   /** SecureStore reads are ASYNC on native — the guard must wait for this. */
   hydrated: boolean;
   setSession: (session: AuthResponse) => void;
-  setHydrated: () => void;
   clearSession: () => void;
 }
 
@@ -43,7 +42,6 @@ export const useAuthStore = create<AuthState>()(
           refreshToken: session.refreshToken,
           expiresAt: session.expiresAt,
         }),
-      setHydrated: () => set({ hydrated: true }),
       clearSession: () =>
         set({ user: null, accessToken: null, refreshToken: null, expiresAt: null }),
     }),
@@ -56,8 +54,13 @@ export const useAuthStore = create<AuthState>()(
         refreshToken: state.refreshToken,
         expiresAt: state.expiresAt,
       }),
-      onRehydrateStorage: () => (state) => {
-        state?.setHydrated();
+      // Zustand v5 fires this callback on success AND on a rejected storage
+      // read. Direct setState (not a persisted action — no redundant keychain
+      // write) so a failed keychain read fails LOGGED OUT instead of hanging
+      // on the splash forever. The inner callback runs after create() returns,
+      // so referencing useAuthStore here is safe.
+      onRehydrateStorage: () => () => {
+        useAuthStore.setState({ hydrated: true });
       },
     },
   ),
