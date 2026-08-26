@@ -4,7 +4,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui';
 import { Toast } from '@/components/Toast';
 import { STATUS_STYLES, statusLabel, unitLabel } from '@/lib/enums';
@@ -27,12 +27,22 @@ export function ProductDetailView({ id }: { id: number }) {
   const product = useProduct(Number.isFinite(id) ? id : -1);
   const [stockDialogOpen, setStockDialogOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const searchParams = useSearchParams();
 
   // A param change can remount this view for a DIFFERENT product (client-side
   // id→id navigation) — never show the previous product's toast.
   useEffect(() => {
     setToast(null);
   }, [id]);
+
+  // Edit screen redirected here with ?saved=1 — show the toast once, then
+  // clean the URL so a refresh doesn't repeat it.
+  useEffect(() => {
+    if (searchParams.get('saved') === '1') {
+      setToast('Ürün güncellendi.');
+      router.replace(`/products/${id}`, { scroll: false });
+    }
+  }, [searchParams, router, id]);
 
   if (!Number.isFinite(id)) {
     return (
