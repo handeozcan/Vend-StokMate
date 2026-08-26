@@ -59,8 +59,12 @@ function SortHeader({
   onSort: (column: ProductSort) => void;
 }) {
   const active = filters.sort === column;
+  const sortValue = !active ? 'none' : filters.dir === 'asc' ? 'ascending' : 'descending';
   return (
-    <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-500 ${align ?? ''}`}>
+    <th
+      aria-sort={sortValue}
+      className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-500 ${align ?? ''}`}
+    >
       <button
         type="button"
         onClick={() => onSort(column)}

@@ -44,9 +44,19 @@ export function ProductListView() {
     router.push(`${pathname}?${filtersToSearchParams(next).toString()}`, { scroll: false });
   };
 
-  // Push the debounced search term into the URL only when it actually changed.
+  // Push the debounced search term into the URL when it differs from the LIVE
+  // URL's q. Reading window.location.search (not the `filters` closure) is
+  // deliberate: if the user selects a filter while the debounce timer is
+  // pending, the closure lags and would serialize that filter away.
   useEffect(() => {
-    if ((debouncedQ || undefined) !== filters.q) setFilters({ q: debouncedQ || undefined });
+    const current = parseFilters(new URLSearchParams(window.location.search));
+    const nextQ = debouncedQ || undefined;
+    if (nextQ !== current.q) {
+      router.push(
+        `${pathname}?${filtersToSearchParams({ ...current, q: nextQ, page: 1 }).toString()}`,
+        { scroll: false },
+      );
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQ]);
 
@@ -92,7 +102,9 @@ export function ProductListView() {
           data={products.data}
           filters={filters}
           setFilters={setFilters}
-          isFetching={products.isFetching}
+          // Dim only while a filter/page transition shows stale data
+          // (isPlaceholderData) — not on the silent 60s background refetch.
+          isFetching={products.isFetching && products.isPlaceholderData}
         />
       )}
     </>
