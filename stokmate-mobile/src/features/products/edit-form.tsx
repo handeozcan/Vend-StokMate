@@ -19,10 +19,11 @@ import { SelectField } from './select-field';
 import { productEditSchema, type ProductEditFormValues } from './edit-schema';
 
 // Keep digits and at most the FIRST dot ("1.2.3" would Number() to NaN).
+// Junk-only input ("abc") cleans to '' → undefined, never a silent 0.
 const numeric = (text: string): number | undefined => {
-  if (text === '') return undefined;
   const [head, ...rest] = text.replace(/[^0-9.]/g, '').split('.');
-  return Number([head, rest.join('')].filter(Boolean).join('.'));
+  const cleaned = [head, rest.join('')].filter(Boolean).join('.');
+  return cleaned === '' ? undefined : Number(cleaned);
 };
 
 interface Props {
@@ -127,7 +128,8 @@ export function EditForm({ product, onSaved }: Props) {
         name="sku"
         render={({ field, fieldState }) => (
           <View>
-            <TextInput label="Stok kodu (SKU)" autoCapitalize="none" value={field.value} onChangeText={field.onChange} onBlur={field.onBlur} error={Boolean(fieldState.error)} />
+            {/* ref wires RHF's setFocus('sku') for the 409 conflict case */}
+            <TextInput ref={field.ref} label="Stok kodu (SKU)" autoCapitalize="none" value={field.value} onChangeText={field.onChange} onBlur={field.onBlur} error={Boolean(fieldState.error)} />
             {fieldState.error && <HelperText type="error" visible>{fieldState.error.message}</HelperText>}
           </View>
         )}
