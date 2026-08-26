@@ -1,0 +1,90 @@
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { productApi } from '@/api/products';
+import type {
+  PagedResult,
+  ProductDto,
+  ProductQueryParams,
+  UpdateProductRequest,
+} from '@/types/api';
+
+/** List — key is the full filter object. NO refetchInterval: the 60s polling
+ *  bonus is web-only (spec §11); native refetches on mount/focus. */
+export function useProducts(params: ProductQueryParams) {
+  return useQuery({
+    queryKey: ['products', params],
+    queryFn: () => productApi.list(params),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useProductStats() {
+  return useQuery({
+    queryKey: ['product-stats'],
+    queryFn: productApi.stats,
+  });
+}
+
+/**
+ * NO GET /products/{id} exists (verified). Resolution order: scan cached
+ * ['products'] pages; cold cache → one bounded pageSize=100 fetch (seed is 80
+ * rows); else null = confirmed missing.
+ */
+export function useProduct(id: number) {
+  const queryClient = useQueryClient();
+
+  return useQuery({
+    queryKey: ['products', 'detail', id],
+    staleTime: Infinity,
+    // Invalid route param (NaN/-1): fetch nothing — id must also be positive.
+    enabled: Number.isFinite(id) && id > 0,
+    queryFn: async (): Promise<ProductDto | null> => {
+      for (const [key, data] of queryClient.getQueriesData<PagedResult<ProductDto>>({
+        queryKey: ['products'],
+      })) {
+        if (key[1] === 'detail' || !Array.isArray(data?.items)) continue;
+        const hit = data.items.find((p) => p.id === id);
+        if (hit) return hit;
+      }
+      const page = await productApi.list({ pageSize: 100 });
+      return page.items.find((p) => p.id === id) ?? null;
+    },
+  });
+}
+
+/** Same cache policy as web: write detail, invalidate lists (predicate
+ *  excludes detail) + stats. */
+function useApplyProductMutationResult() {
+  const queryClient = useQueryClient();
+
+  return (updated: ProductDto) => {
+    queryClient.setQueryData(['products', 'detail', updated.id], updated);
+    queryClient.invalidateQueries({
+      queryKey: ['products'],
+      predicate: (query) => query.queryKey[1] !== 'detail',
+    });
+    queryClient.invalidateQueries({ queryKey: ['product-stats'] });
+  };
+}
+
+export function useUpdateStock() {
+  const apply = useApplyProductMutationResult();
+  return useMutation({
+    mutationFn: ({ id, stock }: { id: number; stock: number }) =>
+      productApi.updateStock(id, stock),
+    onSuccess: apply,
+  });
+}
+
+export function useUpdateProduct() {
+  const apply = useApplyProductMutationResult();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: number; body: UpdateProductRequest }) =>
+      productApi.update(id, body),
+    onSuccess: (updated) => apply(updated),
+  });
+}
