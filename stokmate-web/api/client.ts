@@ -63,7 +63,15 @@ apiClient.interceptors.response.use(
 
     if (canRetry) {
       try {
-        const session = await refreshSession();
+        // If another refresh already rotated the token while this request was
+        // in flight (its Authorization header is stale), replay directly —
+        // refreshing again would burn an extra single-use rotation.
+        const currentToken = useAuthStore.getState().accessToken;
+        const requestAuth = config.headers?.Authorization;
+        const session =
+          currentToken && requestAuth !== `Bearer ${currentToken}`
+            ? { accessToken: currentToken }
+            : await refreshSession();
         config._retried = true;
         config.headers = { ...config.headers, Authorization: `Bearer ${session.accessToken}` };
         return apiClient.request(config);
