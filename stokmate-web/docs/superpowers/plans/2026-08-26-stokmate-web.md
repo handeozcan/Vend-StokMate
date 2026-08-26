@@ -2201,6 +2201,11 @@ export function StockDialog({ product, onClose }: Props) {
     defaultValues: { stock: product.stock },
   });
 
+  // Merge RHF's ref (validation) with our focus ref — spreading
+  // `ref={inputRef}` alongside `{...register}` triggers TS2783 and would
+  // drop one of the two refs.
+  const { ref: stockFieldRef, ...stockField } = register('stock', { valueAsNumber: true });
+
   // Escape closes; focus lands on the input when the dialog mounts.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -2246,12 +2251,15 @@ export function StockDialog({ product, onClose }: Props) {
 
         <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
           <Field
-            ref={inputRef}
             label="Yeni stok"
             id="stock"
             type="number"
             error={errors.stock?.message}
-            {...register('stock', { valueAsNumber: true })}
+            {...stockField}
+            ref={(element) => {
+              inputRef.current = element;
+              stockFieldRef(element);
+            }}
           />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={() => onClose()}>
@@ -2270,7 +2278,10 @@ export function StockDialog({ product, onClose }: Props) {
 ```
 
 Note A: `Field` accepts `ref` via `ComponentPropsWithRef<'input'>` (Task 8
-Step 5) — the dialog's `inputRef` and RHF's `register()` ref both flow through.
+Step 5), but RHF's `register()` spread ALSO carries a ref — declaring both on
+the same JSX element is TS2783 and silently drops one. The dialog therefore
+destructures register's ref and composes it with the focus ref in one callback
+ref (see the code above).
 
 Note B: the parent conditionally mounts the dialog (`stockDialogOpen && …`), so
 every open re-initializes `defaultValues` with the current stock — no `reset`
