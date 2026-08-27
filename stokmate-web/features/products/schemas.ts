@@ -20,9 +20,10 @@ const count = (label: string) =>
     .min(0, `${label} negatif olamaz.`);
 
 /**
- * Form works in TL; the submit handler converts price/costPrice to kuruş via
- * toKurus(). costPrice, supplierId and description are REQUIRED in the form
- * even though no GET returns them — PUT is a full replace (API trap).
+ * Form works in TL; the submit handler converts price to kuruş via toKurus().
+ * supplierId/costPrice/description are NOT in the form: no GET returns them
+ * (PUT is a full replace — API trap), so the submit handler sends hidden
+ * neutral values instead of making the user re-enter invisible fields.
  */
 export const productEditSchema = z.object({
   name: z.string().min(1, 'Ürün adı zorunludur.'),
@@ -30,9 +31,7 @@ export const productEditSchema = z.object({
   barcode: z.string(),
   categoryId: positiveId('Kategori'),
   brandId: positiveId('Marka'),
-  supplierId: positiveId('Tedarikçi'),
   price: money('Fiyat'),
-  costPrice: money('Maliyet'),
   stock: count('Stok'),
   minStock: count('Minimum stok'),
   unit: z.number({ message: 'Birim seçin.' }).int().min(1).max(4),
@@ -40,7 +39,6 @@ export const productEditSchema = z.object({
     .number({ message: 'Durum seçin.' })
     .int()
     .refine((value) => [1, 2, 3].includes(value), 'Geçersiz durum.'),
-  description: z.string().min(1, 'Açıklama zorunludur.'),
   isFeatured: z.boolean(),
 });
 
