@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  KeyboardAvoidingView,
   ScrollView,
   View,
 } from 'react-native';
@@ -47,19 +48,23 @@ export default function ProductList() {
   };
 
   return (
-    <FlatList
-      data={items}
-      keyExtractor={(item) => String(item.id)}
-      renderItem={({ item }) => <ProductCard product={item} />}
-      onEndReached={() => {
-        if (products.hasNextPage && !products.isFetchingNextPage && !products.isError) {
-          products.fetchNextPage();
-        }
-      }}
-      onEndReachedThreshold={0.4}
-      contentContainerStyle={{ padding: 12, gap: 8 }}
-      keyboardShouldPersistTaps="handled"
-      ListHeaderComponent={
+    // KAV: edge-to-edge'te (SDK 57) Android pencereyi küçültmez — arama açıkken
+    // liste klavyenin üstüne çekilir; sürükleyince klavye iner.
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+      <FlatList
+        data={items}
+        keyExtractor={(item) => String(item.id)}
+        renderItem={({ item }) => <ProductCard product={item} />}
+        onEndReached={() => {
+          if (products.hasNextPage && !products.isFetchingNextPage && !products.isError) {
+            products.fetchNextPage();
+          }
+        }}
+        onEndReachedThreshold={0.4}
+        contentContainerStyle={{ padding: 12, gap: 8 }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        ListHeaderComponent={
         <View style={{ gap: 8 }}>
           <StatsCards />
           <TextInput
@@ -97,8 +102,8 @@ export default function ProductList() {
           {(products.isPending || products.isPlaceholderData) && <ActivityIndicator style={{ padding: 8 }} />}
           {hasFilters && <Text variant="labelSmall" style={{ opacity: 0.6 }}>{total} ürün</Text>}
         </View>
-      }
-      ListEmptyComponent={
+        }
+        ListEmptyComponent={
         products.isError ? (
           <Surface style={{ borderRadius: 12, padding: 24, gap: 8, alignItems: 'center' }}>
             <Text variant="bodyMedium" style={{ color: '#dc2626' }}>{products.error.message}</Text>
@@ -112,8 +117,8 @@ export default function ProductList() {
             {hasFilters && <Chip onPress={reset}>Filtreleri temizle</Chip>}
           </Surface>
         )
-      }
-      ListFooterComponent={
+        }
+        ListFooterComponent={
         products.isFetchingNextPage ? (
           <ActivityIndicator style={{ padding: 12 }} />
         ) : products.isError && items.length > 0 ? (
@@ -128,7 +133,8 @@ export default function ProductList() {
             {total} ürünün tamamı listelendi
           </Text>
         ) : null
-      }
-    />
+        }
+      />
+    </KeyboardAvoidingView>
   );
 }

@@ -1,7 +1,7 @@
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Redirect } from 'expo-router';
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, ScrollView, View } from 'react-native';
 import { Button, HelperText, Surface, Text, TextInput } from 'react-native-paper';
 import { useAuthStore } from '@/store/auth';
 import { loginSchema, type LoginFormValues } from '@/features/auth/schema';
@@ -28,11 +28,11 @@ export default function Login() {
     if (!login.isPending) login.mutate(values);
   });
 
+  // padding on BOTH platforms: with SDK 57 edge-to-edge, Android's adjustResize
+  // no longer resizes the window — behavior undefined would let the keyboard
+  // cover the inputs.
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24, gap: 24 }}
         keyboardShouldPersistTaps="handled"
