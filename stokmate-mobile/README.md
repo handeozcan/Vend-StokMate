@@ -13,7 +13,7 @@ EAS Build'de ayrıca `eas.json` profilindeki `env` bloğu geçerlidir.
 |---|---|---|
 | Android emulator + `expo start` | `.env` (veya `__DEV__` fallback) | `http://10.0.2.2:5080` |
 | Kendi telefonum (aynı Wi-Fi) | `.env.local` (gitignore'lı) | `http://<LAN-IP>:5080` |
-| **Dağıtılan APK (her telefon)** | `.env.production` / `distribution` profili | `https://stokmate-api.onrender.com` |
+| **Dağıtılan APK (her telefon)** | `.env.production` / `distribution` profili | `https://stokmate-api-6ec8.onrender.com` |
 
 ## Setup (development)
 
@@ -49,7 +49,7 @@ eas build -p android --profile preview
 ## Backend (production)
 
 The .NET API is deployed from the `stokmate-api/` folder of this repository to
-Render (Docker, env `ASPNETCORE_URLS`): **https://stokmate-api.onrender.com** —
+Render (Docker, env `ASPNETCORE_URLS`): **https://stokmate-api-6ec8.onrender.com** —
 in-memory DB reseeds on every cold start; tokens live in process memory.
 
 ## Features
