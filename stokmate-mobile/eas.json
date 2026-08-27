@@ -16,10 +16,22 @@
         "EXPO_PUBLIC_API_BASE_URL": "http://192.168.1.157:5080"
       }
     },
+    "distribution": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://stokmate-api.onrender.com"
+      }
+    },
     "production": {
       "autoIncrement": true,
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://stokmate-api.onrender.com"
       }
     }
   }

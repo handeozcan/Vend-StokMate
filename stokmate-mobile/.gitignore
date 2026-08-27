@@ -31,8 +31,11 @@ yarn-error.*
 *.pem
 
 # local env files
+# Yalnızca cihaza özel dosyalar ignore edilir; ortak varsayılanlar commit'lenir.
 .env*
 !.env.example
+!.env.development
+!.env.production
 
 # typescript
 *.tsbuildinfo
