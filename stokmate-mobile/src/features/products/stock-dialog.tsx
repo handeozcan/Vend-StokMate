@@ -61,8 +61,15 @@ export function StockDialog({ product, onClose }: Props) {
                 <TextInput
                   label="Yeni stok"
                   keyboardType="number-pad"
-                  value={field.value === undefined ? '' : String(field.value)}
-                  onChangeText={(text) => field.onChange(text === '' ? undefined : Number(text.replace(/[^0-9]/g, '')))}
+                  value={field.value == null || Number.isNaN(field.value) ? '' : String(field.value)}
+                  onChangeText={(text) => {
+                    // Digits only, leading zeros stripped ("007"→"7", lone "0"
+                    // stays). Empty → NaN: NOT undefined — RHF's Controller
+                    // falls back to defaultValues on undefined, which made the
+                    // field unclearable (it snapped back to the old stock).
+                    const digits = text.replace(/[^0-9]/g, '').replace(/^0+(?=\d)/, '');
+                    field.onChange(digits === '' ? Number.NaN : Number(digits));
+                  }}
                   onBlur={field.onBlur}
                   error={Boolean(fieldState.error)}
                 />

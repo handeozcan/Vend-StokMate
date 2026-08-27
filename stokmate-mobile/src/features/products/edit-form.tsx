@@ -19,11 +19,13 @@ import { SelectField } from './select-field';
 import { productEditSchema, type ProductEditFormValues } from './edit-schema';
 
 // Keep digits and at most the FIRST dot ("1.2.3" would Number() to NaN).
-// Junk-only input ("abc") cleans to '' → undefined, never a silent 0.
-const numeric = (text: string): number | undefined => {
+// Empty/junk-only input ("abc") → NaN sentinel: z.number() rejects it with the
+// field's message. NOT undefined — RHF's Controller falls back to defaultValues
+// on undefined, which made cleared fields snap back (unclearable input bug).
+const numeric = (text: string): number => {
   const [head, ...rest] = text.replace(/[^0-9.]/g, '').split('.');
   const cleaned = [head, rest.join('')].filter(Boolean).join('.');
-  return cleaned === '' ? undefined : Number(cleaned);
+  return cleaned === '' ? Number.NaN : Number(cleaned);
 };
 
 interface Props {
@@ -54,7 +56,9 @@ export function EditForm({ product, onSaved }: Props) {
       // No GET returns these three — they start empty and MUST be re-entered.
       supplierId: 0,
       price: product.price / 100,
-      costPrice: undefined as unknown as number, // NOT NaN: renders "NaN" in inputs
+      // NaN = empty sentinel (no GET returns costPrice): renders '' and fails
+      // validation until entered — see numeric().
+      costPrice: Number.NaN,
       stock: product.stock,
       minStock: product.minStock,
       unit: product.unit,
@@ -180,7 +184,7 @@ export function EditForm({ product, onSaved }: Props) {
             <TextInput
               label="Fiyat (TL)"
               keyboardType="decimal-pad"
-              value={field.value === undefined ? '' : String(field.value)}
+              value={field.value == null || Number.isNaN(field.value) ? '' : String(field.value)}
               onChangeText={(t) => field.onChange(numeric(t))}
               onBlur={field.onBlur}
               error={Boolean(fieldState.error)}
@@ -197,7 +201,7 @@ export function EditForm({ product, onSaved }: Props) {
             <TextInput
               label="Maliyet (TL)"
               keyboardType="decimal-pad"
-              value={field.value === undefined ? '' : String(field.value)}
+              value={field.value == null || Number.isNaN(field.value) ? '' : String(field.value)}
               onChangeText={(t) => field.onChange(numeric(t))}
               onBlur={field.onBlur}
               error={Boolean(fieldState.error)}
@@ -214,7 +218,7 @@ export function EditForm({ product, onSaved }: Props) {
             <TextInput
               label="Stok"
               keyboardType="number-pad"
-              value={field.value === undefined ? '' : String(field.value)}
+              value={field.value == null || Number.isNaN(field.value) ? '' : String(field.value)}
               onChangeText={(t) => field.onChange(numeric(t))}
               onBlur={field.onBlur}
               error={Boolean(fieldState.error)}
@@ -231,7 +235,7 @@ export function EditForm({ product, onSaved }: Props) {
             <TextInput
               label="Minimum stok"
               keyboardType="number-pad"
-              value={field.value === undefined ? '' : String(field.value)}
+              value={field.value == null || Number.isNaN(field.value) ? '' : String(field.value)}
               onChangeText={(t) => field.onChange(numeric(t))}
               onBlur={field.onBlur}
               error={Boolean(fieldState.error)}
