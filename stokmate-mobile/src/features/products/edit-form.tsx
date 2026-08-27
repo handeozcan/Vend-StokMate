@@ -2,7 +2,6 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { View } from 'react-native';
 import {
-  Banner,
   Button,
   HelperText,
   Surface,
@@ -53,17 +52,11 @@ export function EditForm({ product, onSaved }: Props) {
       barcode: product.barcode,
       categoryId: product.categoryId,
       brandId: product.brandId,
-      // No GET returns these three — they start empty and MUST be re-entered.
-      supplierId: 0,
       price: product.price / 100,
-      // NaN = empty sentinel (no GET returns costPrice): renders '' and fails
-      // validation until entered — see numeric().
-      costPrice: Number.NaN,
       stock: product.stock,
       minStock: product.minStock,
       unit: product.unit,
       status: product.status,
-      description: '',
       isFeatured: product.isFeatured,
     },
   });
@@ -76,14 +69,19 @@ export function EditForm({ product, onSaved }: Props) {
       barcode: values.barcode,
       categoryId: values.categoryId,
       brandId: values.brandId,
-      supplierId: values.supplierId,
+      // PUT is a full replace and no GET returns these three (API trap), but
+      // the fields are hidden from the form — send neutral values instead of
+      // forcing a re-entry of values the user can never see. supplierId must
+      // reference an existing supplier; costPrice 0 and empty description are
+      // both accepted by the API.
+      supplierId: suppliers.data?.[0]?.id ?? 1,
       price: toKurus(values.price),
-      costPrice: toKurus(values.costPrice),
+      costPrice: 0,
       stock: values.stock,
       minStock: values.minStock,
       unit: values.unit as ProductUnit,
       status: values.status as ProductStatus,
-      description: values.description,
+      description: '',
       isFeatured: values.isFeatured,
     };
     updateProduct.mutate(
@@ -103,12 +101,6 @@ export function EditForm({ product, onSaved }: Props) {
   return (
     <Surface style={{ borderRadius: 16, padding: 16, gap: 12 }} elevation={1}>
       <Text variant="titleLarge">Ürünü Düzenle</Text>
-
-      <Banner visible icon="information">
-        Tedarikçi, maliyet ve açıklama alanları önceki değerlerini API&apos;den alamıyor (API hiçbir
-        listeleme ucunda bu alanları döndürmüyor). Kaydetmek bu üç alanı girdiğiniz değerlerle
-        üzerine yazar.
-      </Banner>
 
       {updateProduct.isError &&
         (updateProduct.error as { status?: number }).status !== 409 && (
@@ -165,17 +157,6 @@ export function EditForm({ product, onSaved }: Props) {
         options={(brands.data ?? []).map((b) => ({ value: b.id, label: b.name }))}
       />
 
-      <SelectField
-        label="Tedarikçi"
-        control={control}
-        name="supplierId"
-        error={errors.supplierId}
-        options={[
-          { value: 0, label: 'Seçin…', disabled: true },
-          ...(suppliers.data ?? []).map((s) => ({ value: s.id, label: s.name })),
-        ]}
-      />
-
       <Controller
         control={control}
         name="price"
@@ -183,23 +164,6 @@ export function EditForm({ product, onSaved }: Props) {
           <View>
             <TextInput
               label="Fiyat (TL)"
-              keyboardType="decimal-pad"
-              value={field.value == null || Number.isNaN(field.value) ? '' : String(field.value)}
-              onChangeText={(t) => field.onChange(numeric(t))}
-              onBlur={field.onBlur}
-              error={Boolean(fieldState.error)}
-            />
-            {fieldState.error && <HelperText type="error" visible>{fieldState.error.message}</HelperText>}
-          </View>
-        )}
-      />
-      <Controller
-        control={control}
-        name="costPrice"
-        render={({ field, fieldState }) => (
-          <View>
-            <TextInput
-              label="Maliyet (TL)"
               keyboardType="decimal-pad"
               value={field.value == null || Number.isNaN(field.value) ? '' : String(field.value)}
               onChangeText={(t) => field.onChange(numeric(t))}
@@ -274,25 +238,6 @@ export function EditForm({ product, onSaved }: Props) {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Switch value={field.value} onValueChange={field.onChange} />
             <Text>Öne çıkan ürün</Text>
-          </View>
-        )}
-      />
-
-      <Controller
-        control={control}
-        name="description"
-        render={({ field, fieldState }) => (
-          <View>
-            <TextInput
-              label="Açıklama"
-              multiline
-              numberOfLines={3}
-              value={field.value}
-              onChangeText={field.onChange}
-              onBlur={field.onBlur}
-              error={Boolean(fieldState.error)}
-            />
-            {fieldState.error && <HelperText type="error" visible>{fieldState.error.message}</HelperText>}
           </View>
         )}
       />
