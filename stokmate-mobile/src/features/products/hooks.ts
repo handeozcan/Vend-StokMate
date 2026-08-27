@@ -4,6 +4,7 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
+  type QueryClient,
 } from '@tanstack/react-query';
 import { productApi } from '@/api/products';
 import type {
@@ -33,29 +34,40 @@ export function useProductStats() {
   });
 }
 
+/** Scan cached list pages for a product — used only as an instant placeholder
+ *  when navigating to the detail; the data itself always comes from the API. */
+function findInListCache(queryClient: QueryClient, id: number): ProductDto | undefined {
+  for (const [key, data] of queryClient.getQueriesData<PagedResult<ProductDto>>({
+    queryKey: ['products'],
+  })) {
+    if (key[1] === 'detail' || !Array.isArray(data?.items)) continue;
+    const hit = data.items.find((p) => p.id === id);
+    if (hit) return hit;
+  }
+  return undefined;
+}
+
 /**
- * NO GET /products/{id} exists (verified). Resolution order: scan cached
- * ['products'] pages; cold cache → one bounded pageSize=100 fetch (seed is 80
- * rows); else null = confirmed missing.
+ * NO GET /products/{id} exists (verified). Each fetch pulls the bounded
+ * pageSize=100 page (seed is 80 rows) and picks the row, so the detail screen
+ * live-updates with web-side edits — same 60s cadence as the list. The list
+ * cache only provides the instant paint while the fetch is in flight; else
+ * null = confirmed missing.
  */
 export function useProduct(id: number) {
   const queryClient = useQueryClient();
 
   return useQuery({
     queryKey: ['products', 'detail', id],
-    staleTime: Infinity,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
     // Invalid route param (NaN/-1): fetch nothing — id must also be positive.
     enabled: Number.isFinite(id) && id > 0,
+    placeholderData: () => findInListCache(queryClient, id),
     queryFn: async (): Promise<ProductDto | null> => {
-      for (const [key, data] of queryClient.getQueriesData<PagedResult<ProductDto>>({
-        queryKey: ['products'],
-      })) {
-        if (key[1] === 'detail' || !Array.isArray(data?.items)) continue;
-        const hit = data.items.find((p) => p.id === id);
-        if (hit) return hit;
-      }
       const page = await productApi.list({ pageSize: 100 });
-      return page.items.find((p) => p.id === id) ?? null;
+      const hit = page.items.find((p) => p.id === id);
+      return hit ?? findInListCache(queryClient, id) ?? null;
     },
   });
 }

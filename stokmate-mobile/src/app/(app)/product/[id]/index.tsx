@@ -36,7 +36,9 @@ export default function ProductDetail() {
     );
   }
 
-  if (product.isPending) {
+  // With a list-cache placeholder the row paints instantly while the fetch
+  // is in flight (isPending stays true until real data lands).
+  if (product.isPending && !product.isPlaceholderData) {
     return <Text style={{ padding: 16, opacity: 0.6 }}>Yükleniyor…</Text>;
   }
 

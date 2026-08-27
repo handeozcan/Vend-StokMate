@@ -21,7 +21,8 @@ export default function ProductEdit() {
     );
   }
 
-  if (product.isPending) return <Text style={{ padding: 16, opacity: 0.6 }}>Yükleniyor…</Text>;
+  if (product.isPending && !product.isPlaceholderData)
+    return <Text style={{ padding: 16, opacity: 0.6 }}>Yükleniyor…</Text>;
 
   if (product.isError) {
     return (
