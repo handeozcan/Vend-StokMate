@@ -23,7 +23,9 @@ export function FilterBar({ q, onQChange, filters, setFilters, onReset }: Props)
 
   return (
     <div className="mb-3 rounded-2xl bg-surface p-4 shadow-sm">
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] lg:items-start">
+      {/* items-end: etiketli alanların inputlarıyla aynı hizaya iner ("Temizle"
+          butonu etiket satırında değil input satırında durur). */}
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] lg:items-end">
         <Field
           label="Ara (ad, stok kodu, barkod)"
           id="filter-q"
