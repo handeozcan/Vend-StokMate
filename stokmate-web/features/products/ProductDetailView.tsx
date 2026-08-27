@@ -85,7 +85,9 @@ export function ProductDetailView({ id }: { id: number }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <Button variant="ghost" className="self-start" onClick={() => router.back()}>
+      {/* Geçmişe değil hiyerarşiye göre gider: kaydetme akımı geçmişte art arda
+          iki detay kaydı bırakır, back() yine detaya dönerdi. */}
+      <Button variant="ghost" className="self-start" onClick={() => router.push('/products')}>
         ← Geri
       </Button>
 

@@ -48,7 +48,9 @@ export function ProductEditView({ id }: { id: number }) {
       <Button
         variant="ghost"
         className="self-start"
-        onClick={() => router.push(`/products/${id}`)}
+        // back(), geçmişi doğru geri sarar; push yeni geçmiş kaydı ekleyip
+        // detaydaki "Geri"yi tekrar bu sayfaya gönderirdi.
+        onClick={() => router.back()}
       >
         ← Ürüne dön
       </Button>
@@ -57,7 +59,9 @@ export function ProductEditView({ id }: { id: number }) {
         onSaved={() => {
           // Success feedback lives on the detail page (?saved=1 → toast there):
           // navigating away would unmount this view before any local toast shows.
-          router.push(`/products/${id}?saved=1`);
+          // replace: the completed edit must not linger in history — with push,
+          // browser-back from the detail would reopen this form.
+          router.replace(`/products/${id}?saved=1`);
         }}
       />
     </div>
