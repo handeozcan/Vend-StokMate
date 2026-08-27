@@ -13,13 +13,15 @@ import type {
   UpdateProductRequest,
 } from '@/types/api';
 
-/** List — key is the full filter object. NO refetchInterval: the 60s polling
- *  bonus is web-only (spec §11); native refetches on mount/focus. */
+/** List — key is the full filter object. Polling parity with web (60s): the
+ *  API has no push, so a web-side edit reaches an open mobile screen within
+ *  a minute (focus refetch alone only fires on app switch, ≥30s stale). */
 export function useProducts(params: ProductQueryParams) {
   return useQuery({
     queryKey: ['products', params],
     queryFn: () => productApi.list(params),
     placeholderData: keepPreviousData,
+    refetchInterval: 60_000,
   });
 }
 
@@ -27,6 +29,7 @@ export function useProductStats() {
   return useQuery({
     queryKey: ['product-stats'],
     queryFn: productApi.stats,
+    refetchInterval: 60_000,
   });
 }
 
@@ -83,6 +86,8 @@ export function useProductsInfinite(params: ProductQueryParams) {
       return lastPage.page < totalPages ? lastPage.page + 1 : undefined;
     },
     placeholderData: keepPreviousData,
+    // Keeps an open list screen in sync with edits made from the web app.
+    refetchInterval: 60_000,
   });
 }
 
