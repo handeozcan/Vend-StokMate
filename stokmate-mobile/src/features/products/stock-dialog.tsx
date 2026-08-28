@@ -1,7 +1,7 @@
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { KeyboardAvoidingView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { Button, Dialog, HelperText, Portal, Text, TextInput } from 'react-native-paper';
 import type { ProductDto } from '@/types/api';
 import { unitLabel } from '@/lib/enums';
@@ -43,10 +43,10 @@ export function StockDialog({ product, onClose }: Props) {
   return (
     <Portal>
       <Dialog visible onDismiss={() => onClose()} style={{ backgroundColor: 'white' }}>
-        {/* KAV: edge-to-edge'te (SDK 57) klavye dialog içeriğini örtebilir —
-            "padding" içeriği klavyenin üstüne taşır. Dialog tek çocuğu klonlayıp
-            marginTop verir; ilk öğe Title olduğu için görsel fark yok. */}
-        <KeyboardAvoidingView behavior="padding">
+        {/* Expo keyboard rehberi: iOS "padding" / Android behavior undefined.
+            Dialog tek çocuğu klonlayıp marginTop verir; ilk öğe Title olduğu
+            için görsel fark yok. */}
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <Dialog.Title>Stok Güncelle — {product.name}</Dialog.Title>
           <Dialog.Content>
             <Text variant="bodySmall" style={{ opacity: 0.6, marginBottom: 12 }}>

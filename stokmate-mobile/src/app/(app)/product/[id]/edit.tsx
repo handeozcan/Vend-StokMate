@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { KeyboardAvoidingView, ScrollView } from 'react-native';
+import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 import { Chip, Snackbar, Surface, Text } from 'react-native-paper';
 import { useProduct } from '@/features/products/hooks';
 import { EditForm } from '@/features/products/edit-form';
@@ -43,26 +43,27 @@ export default function ProductEdit() {
 
   return (
     <>
-      {/* SDK 57 (edge-to-edge): Android'de adjustResize pencereyi küçültmediği
-          için KAV + scroll gerekir — yoksa alttaki alanlar klavyenin altında
-          kalır ve odaklanan input görünmez. */}
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-        <ScrollView
-          contentContainerStyle={{ padding: 16 }}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-        >
-          <EditForm
-            product={product.data}
-            onSaved={() => {
-              // Success feedback HERE (a toast on the next screen would mount
-              // too late) — brief Snackbar, then navigate to the detail.
-              setSnackbar('Ürün güncellendi.');
-              setTimeout(() => router.dismissTo(`/product/${productId}`), 700);
-            }}
-          />
-        </ScrollView>
-      </KeyboardAvoidingView>
+      {/* Expo keyboard rehberi: çok inputlu form → KeyboardAwareScrollView
+          focuslanan input'u klavyenin üstüne otomatik kaydırır; KeyboardToolbar
+          alanlar arası ileri/geri + kapatma verir. bottomOffset = input'un
+          altındaki hata mesajı payı. */}
+      <KeyboardAwareScrollView
+        bottomOffset={62}
+        contentContainerStyle={{ padding: 16 }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
+        <EditForm
+          product={product.data}
+          onSaved={() => {
+            // Success feedback HERE (a toast on the next screen would mount
+            // too late) — brief Snackbar, then navigate to the detail.
+            setSnackbar('Ürün güncellendi.');
+            setTimeout(() => router.dismissTo(`/product/${productId}`), 700);
+          }}
+        />
+      </KeyboardAwareScrollView>
+      <KeyboardToolbar />
       <Snackbar visible={snackbar !== null} onDismiss={() => setSnackbar(null)} duration={1400}>
         {snackbar}
       </Snackbar>

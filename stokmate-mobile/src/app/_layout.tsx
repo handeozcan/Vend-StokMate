@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router/stack';
 import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { AppState } from 'react-native';
 import { QueryClient, QueryClientProvider, focusManager } from '@tanstack/react-query';
 import { ApiError } from '@/api/errors';
@@ -32,10 +33,14 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <PaperProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(app)" />
-            <Stack.Screen name="(auth)" />
-          </Stack>
+          {/* KeyboardAwareScrollView (edit formu) için zorunlu — klavye
+              yüksekliği senkron animasyonlu gelir (Expo keyboard rehberi). */}
+          <KeyboardProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(app)" />
+              <Stack.Screen name="(auth)" />
+            </Stack>
+          </KeyboardProvider>
         </QueryClientProvider>
       </PaperProvider>
     </SafeAreaProvider>

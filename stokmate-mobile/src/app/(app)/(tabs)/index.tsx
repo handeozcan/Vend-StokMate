@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
+  Platform,
   ScrollView,
   View,
 } from 'react-native';
@@ -48,9 +49,12 @@ export default function ProductList() {
   };
 
   return (
-    // KAV: edge-to-edge'te (SDK 57) Android pencereyi küçültmez — arama açıkken
-    // liste klavyenin üstüne çekilir; sürükleyince klavye iner.
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+    // Expo keyboard rehberi: iOS "padding" / Android behavior undefined.
+    // Arama input'u üstte; KAV listeyi klavyenin üstünde tutar.
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <FlatList
         data={items}
         keyExtractor={(item) => String(item.id)}
