@@ -32,6 +32,24 @@ StokMate stock management assignment. Consumes the provided .NET API (see
   pagination — all state in the URL (shareable views)
 - Dashboard stats (total / out of stock / low stock)
 - Product detail with quick stock update (PATCH)
-- Full product edit (PUT) — supplier, cost price and description are re-entered
-  because the API never returns their current values
+- Full product edit (PUT) — supplier, cost price and description are hidden
+  from the form (the API never returns their current values); saving sends
+  neutral values instead
 - Background refetch on window focus + every 60s while the tab is visible
+
+## Kullanılan kütüphaneler ve gerekçeleri
+
+| Kütüphane | Neden tercih edildi |
+|---|---|
+| **Next.js 16** (App Router) | Server Components, dosya bazlı routing, metadata yönetimi; API rotası gerektirmeyen statik admin paneli için tam eşleşme |
+| **React 19** | Next.js 16'nın gerektirdiği sürüm |
+| **Tailwind CSS 4** | Utility-first stil; zinc/teal tasarım sistemi class'larla hızlı ve tutarlı (`bg-surface`, `ring-…`) |
+| **react-hook-form** + **@hookform/resolvers** | Kontrollü state olmadan performanslı formlar; resolver, Zod şemalarını forma bağlar |
+| **Zod 4** | Tek doğrulama kaynağı — aynı şema hem form doğrulama hem TS tipi üretir (`z.infer`) |
+| **@tanstack/react-query** | Server state: cache, `keepPreviousData`, 60s polling, mutation sonrası hedefli invalidation |
+| **Axios** | Interceptor altyapısı: 401'de tek seferde token yenileme (single-flight refresh rotation), `ApiError` ile tip hataları |
+| **Zustand** | Auth gibi global client state için minimal çözüm (Redux kurulum maliyeti yok) |
+| **TypeScript** | API DTO'larıyla (`types/api.ts`) tip güvenli sözleşme; mobil uygulamayla aynı tipler |
+
+Form, doğrulama, veri ve state katmanları mobil uygulamayla birebir aynı
+seçilmiştir — özellikler iki platform arasında 1:1 port edilebilir.
